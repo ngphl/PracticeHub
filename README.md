@@ -1,1 +1,1 @@
-Semantic Analysis Practice - Simple Version
+Practice Repo - contains all my practice and small projects
