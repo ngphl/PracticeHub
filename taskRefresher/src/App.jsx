@@ -6,6 +6,10 @@ import {
   deleteTask,
 } from "./services/tasks";
 
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
+import FilterBar from "./components/FilterBar";
+
 export default function App() {
   const [text, setText] = useState("");
   const [tasks, setTasks] = useState([]);
@@ -53,51 +57,17 @@ export default function App() {
       style={{ maxWidth: 540, margin: "2rem auto", fontFamily: "system-ui" }}
     >
       <h1>Task Tracker</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8 }}>
-        <input
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-          }}
-          placeholder="New Task..."
-        />
-        <button>Add</button>
-      </form>
-      <ul style={{ padding: 0, listStyle: "none" }}>
-        {visible.map((t) => (
-          <li
-            key={t.id}
-            style={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-              padding: "6px 0",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={!!t.done}
-              onChange={() => toggle(t)}
-            />
-            <span style={{ textDecoration: t.done ? "line-through" : "none" }}>
-              {t.title}
-            </span>
-            <button
-              style={{ marginLeft: "auto" }}
-              onClick={() => removeTask(t.id)}
-            >
-              🗑
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div style={{ margin: "1rem 0", display: "flex", gap: 8 }}>
-        {["all", "open", "done"].map((f) => (
-          <button key={f} onClick={() => setFilter(f)} disabled={filter === f}>
-            {f}
-          </button>
-        ))}
-      </div>
+      <TaskForm
+        text={text}
+        setText={setText}
+        handleSubmit={handleSubmit}
+      ></TaskForm>
+      <TaskList
+        lists={visible}
+        toggle={toggle}
+        removeTask={removeTask}
+      ></TaskList>
+      <FilterBar setFilter={setFilter} filter={filter}></FilterBar>
     </main>
   );
 }
