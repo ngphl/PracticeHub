@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-const API = "http://localhost:3000/api/tasks";
+import {
+  listTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "./services/tasks";
 
 export default function App() {
   const [text, setText] = useState("");
@@ -7,67 +12,33 @@ export default function App() {
   const [filter, setFilter] = useState("all"); // all | open | done
 
   useEffect(() => {
-    async function loadTasks() {
-      const res = await fetch(API);
-      const data = await res.json();
-      console.log("Task Loaded");
-      setTasks(data);
-    }
-    loadTasks();
+    listTasks().then(setTasks).catch(console.error);
   }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const title = text.trim();
     if (!title) return;
-
-    const temp = { id: Date.now(), title, done: 0, optimistic: true };
-
-    setTasks((prev) => [temp, ...prev]);
-    setText("");
-
     try {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
-      });
-      const saved = await res.json();
-      setTasks((prev) => [saved, ...prev.filter((t) => t.id !== temp.id)]);
-    } catch {
-      // Rollback
-      setTasks((prev) => prev.filter((t) => t.id !== temp.id));
+      const newTask = await createTask(text);
+      setTasks((prev) => [newTask, ...prev]);
+      setText("");
+    } catch (err) {
+      console.error(err);
     }
   }
 
   async function toggle(task) {
-    const next = task.done ? 0 : 1;
-    setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, done: next } : t))
-    );
-    try {
-      await fetch(`${API}/${task.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: task.title, done: next }),
-      });
-    } catch {
-      //rollback
-      setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, done: task.done } : t))
-      );
-    }
+    const updated = await updateTask(task.id, {
+      title: task.title,
+      done: task.done ? 0 : 1,
+    });
+    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
   }
 
   async function removeTask(id) {
-    const snapshot = tasks;
+    await deleteTask(id);
     setTasks((prev) => prev.filter((t) => t.id !== id));
-    try {
-      const res = await fetch(`${API}/$id`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete Failed");
-    } catch {
-      setTasks(snapshot);
-    }
   }
 
   const visible =
