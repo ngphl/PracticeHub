@@ -1,4 +1,4 @@
-export default function TaskForm({ text, setText, handleSubmit }) {
+export default function TaskForm({ text, setText, handleSubmit, pending }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8 }}>
       <input
@@ -8,7 +8,7 @@ export default function TaskForm({ text, setText, handleSubmit }) {
         }}
         placeholder="New Task..."
       />
-      <button>Add</button>
+      <button disabled={pending}>Add</button>
     </form>
   );
 }
