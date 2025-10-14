@@ -25,7 +25,17 @@ app.post("/api/tasks", (req, res) => {
   res.status(201).json(row);
 });
 
-/** Update a Task */
+/**
+ * @param {import('express').Request} req - Express request (expects task ID in params and {title, done} in body).
+ * @param {import('express').Response} res - Express response returning the updated task JSON.
+ *
+ * @example
+ * * // Request body:
+ * * // { "title": "Buy groceries", "done": true }
+ *
+ * * // Response:
+ * * // { "id": 5, "title": "Buy groceries", "done": 1, "created_at": "2025-10-05 14:10:00" }
+ */
 app.put("/api/tasks/:id", (req, res) => {
   const { title, done } = req.body;
   db.prepare("UPDATE tasks SET title = ?, done = ? WHERE id = ?").run(
@@ -37,7 +47,12 @@ app.put("/api/tasks/:id", (req, res) => {
   res.json(row);
 });
 
-/** Delete a Task */
+/**
+ * @param {import('express').Request} req - Express request (expects task ID in params).
+ * @param {import('express').Response} res - Express response.
+ * @description
+ * * Remove task with ID from database
+ */
 app.delete("/api/tasks/:id", (req, res) => {
   db.prepare("DELETE FROM tasks WHERE id = ?").run(req.params.id);
   res.status(204).end();
