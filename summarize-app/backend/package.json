@@ -1,19 +1,24 @@
 {
   "name": "summarize-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend server for text summarization using OpenAI Responses API",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Felix Nguyen",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.12.2",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "dotevn": "^0.0.1-security",
-    "express": "^5.1.0"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "openai": "^4.104.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }

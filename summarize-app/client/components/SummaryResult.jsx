@@ -1,4 +1,6 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const SummaryResult = ({ summary, loading }) => {
   if (loading) {
@@ -9,7 +11,7 @@ export const SummaryResult = ({ summary, loading }) => {
   return (
     <div className="result-box">
       <h3>Summary:</h3>
-      <p>{summary}</p>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
     </div>
   );
 };

@@ -9,13 +9,13 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 30000,
+  timeout: 60000,
 });
 
 //API Functions
-export const summarizeText = async (text) => {
+export const summarizeText = async (text, mode, tone) => {
   try {
-    const response = await api.post("/summarize", { text });
+    const response = await api.post("/summarize", { text, mode, tone });
     return {
       success: true,
       data: response.data,
@@ -28,3 +28,21 @@ export const summarizeText = async (text) => {
     };
   }
 };
+
+//** Get Summarization Option */
+export const getOptions = async () => {
+  try {
+    const response = await api.get("/api/options");
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+//
