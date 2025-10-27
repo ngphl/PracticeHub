@@ -5,7 +5,11 @@ import cors from "cors";
 // require("dotenv").config();
 
 import "dotenv/config";
-import { generateSummary, getAvailableOptions } from "./services/openai.js";
+import {
+  generateSummary,
+  getAvailableOptions,
+  generateSummaryStream,
+} from "./services/openai.js";
 
 // Create express server application
 const app = express();
@@ -62,6 +66,59 @@ app.post("/summarize", async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
+// Helper function
+function sseSend(res, payload) {
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+//Stream
+app.post("/api/summarize/stream", async (req, res) => {
+  try {
+    const { text, mode = "medium", tone = "professional" } = req.body;
+
+    //Validate
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Text is required",
+      });
+    }
+
+    if (text.length > 10000) {
+      return res.status(400).json({
+        success: false,
+        error: "Text too long (max 10,000 characters)",
+      });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const result = await generateSummaryStream(text, mode, tone, (chunk) => {
+      sseSend(res, { type: "chunk", content: chunk });
+    });
+
+    if (result.success) {
+      sseSend(res, {
+        type: "done",
+        summary: result.summary,
+        tokensUsed: result.tokensUsed,
+        cost: result.cost,
+        mode: result.mode,
+        tone: result.tone,
+      });
+    } else {
+      sseSend(res, { type: "error", error: result.error || "Stream Failed" });
+    }
+    res.end();
+  } catch (err) {
+    console.error("SSE Stream Error: ", { err });
+    sseSend(res, { type: "error", error: result.error || "Stream Failed" });
+    res.end();
   }
 });
 

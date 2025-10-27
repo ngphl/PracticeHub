@@ -77,11 +77,6 @@ export async function generateSummary(
       },
     ];
 
-    console.log("------------------------");
-    console.log("Detected API request");
-    console.log(input);
-    console.log("------------------------");
-
     //Call OpenAI API
     const response = await openai.responses.create({
       model: "gpt-4o-mini",
@@ -89,8 +84,9 @@ export async function generateSummary(
       max_output_tokens: modeConfig.maxTokens,
       temperature: 0.7,
     });
-    console.log(response);
-    console.log("------------------------");
+
+    logHelper(input, response);
+
     //Extract data
     const summary = response.output_text;
     const tokensUsed = response.usage.total_tokens;
@@ -143,6 +139,126 @@ export async function generateSummary(
   }
 }
 
+/**
+ * Generate summary with streaming (real-time response)
+ * @param {string} text - Text to summarize
+ * @param {string} mode - Summarization mode
+ * @param {string} tone - Tone
+ * @param {Function} onChunk - Callback for each chunk
+ * @returns {Promise<Object>}
+ */
+export async function generateSummaryStream(
+  text,
+  mode = "medium",
+  tone = "professional",
+  onChunk
+) {
+  try {
+    if (!text || text.trim().length === 0) {
+      throw new Error("Text cannot be empty");
+    }
+
+    if (!SUMMARIZATION_MODES[mode]) {
+      throw new Error(`Invalid mode: ${mode}`);
+    }
+
+    if (!TONES[tone]) {
+      throw new Error(`Invalid tone: ${mode}`);
+    }
+
+    const modeConfig = SUMMARIZATION_MODES[mode];
+    const toneInstruction = TONES[tone];
+
+    const input = [
+      {
+        role: "system",
+        content: `${modeConfig.systemPrompt} ${toneInstruction}`,
+      },
+      {
+        role: "user",
+        content: `${modeConfig.instruction}:\n\n${text}`,
+      },
+    ];
+
+    console.log(input);
+
+    //Call OpenAI API
+    const stream = await openai.responses.stream({
+      model: "gpt-4o-mini",
+      input: input,
+      max_output_tokens: modeConfig.maxTokens,
+      temperature: 0.7,
+    });
+
+    let fullSummary = "";
+
+    // ✅ Handle raw events; accumulate deltas explicitly
+    stream.on("event", (evt) => {
+      // You saw these in your logs: response.output_text.delta
+      if (evt.type === "response.output_text.delta") {
+        // Delta text is on evt.delta (string)
+        const delta = evt.delta || "";
+        if (delta) {
+          fullSummary += delta;
+          onChunk?.(delta); // push chunk to SSE
+        }
+      }
+
+      // (Optional) handle refusals as text too
+      if (evt.type === "response.refusal.delta") {
+        const delta = evt.delta || "";
+        if (delta) {
+          fullSummary += delta;
+          onChunk?.(delta);
+        }
+      }
+    });
+
+    // When the model finishes (now you have usage)
+    stream.on("end", () => {
+      // no-op: stream.done() resolves below
+    });
+
+    // Wait for completion & get the final response object
+    const finalResponse = await stream.finalResponse();
+
+    console.log("Final response:", JSON.stringify(finalResponse, null, 2));
+
+    console.log("Summary: ", fullSummary);
+
+    const usage = finalResponse?.usage || {};
+    const tokensUsed =
+      usage.total_tokens ??
+      (usage.input_tokens || 0) + (usage.output_tokens || 0);
+
+    //Calculate cost per 1M Tokens
+    const model_inputCost = 0.4;
+    const model_outputCost = 1.6;
+
+    const inputTokens = usage.input_tokens || 0;
+    const outputTokens = usage.output_tokens || 0;
+
+    const inputCost = inputTokens * (model_inputCost / 1_000_000);
+    const outputCost = outputTokens * (model_outputCost / 1_000_000);
+    const totalCost = inputCost + outputCost;
+
+    return {
+      success: true,
+      summary: fullSummary,
+      tokensUsed: tokensUsed,
+      cost: totalCost.toFixed(6),
+      mode,
+      tone,
+    };
+  } catch (error) {
+    console.error("OpenAI Streaming Error:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to generate summary",
+    };
+  }
+}
+
 // Get available modes and tones
 export function getAvailableOptions() {
   return {
@@ -156,4 +272,13 @@ export function getAvailableOptions() {
       label: key.charAt(0).toUpperCase() + key.slice(1),
     })),
   };
+}
+
+function logHelper(input, response) {
+  console.log("------------------------");
+  console.log("Detected API request");
+  console.log(input);
+  console.log("------------------------");
+  console.log(response);
+  console.log("------------------------");
 }
