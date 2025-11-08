@@ -179,9 +179,6 @@ export async function generateSummaryStream(
         content: `${modeConfig.instruction}:\n\n${text}`,
       },
     ];
-
-    console.log(input);
-
     //Call OpenAI API
     const stream = await openai.responses.stream({
       model: "gpt-4o-mini",
@@ -191,42 +188,50 @@ export async function generateSummaryStream(
     });
 
     let fullSummary = "";
-
-    // ✅ Handle raw events; accumulate deltas explicitly
-    stream.on("event", (evt) => {
-      // You saw these in your logs: response.output_text.delta
-      if (evt.type === "response.output_text.delta") {
-        // Delta text is on evt.delta (string)
-        const delta = evt.delta || "";
-        if (delta) {
-          fullSummary += delta;
-          onChunk?.(delta); // push chunk to SSE
+    // Promise resolves with the completed response
+    const completedResponseP = new Promise((resolve) => {
+      stream.on("event", (evt) => {
+        if (evt.type === "response.output_text.delta") {
+          const delta = evt.delta || "";
+          if (delta) {
+            fullSummary += delta;
+            // ⚠️ never let onChunk throw (SSE write can error if client disconnects)
+            try {
+              onChunk?.(delta);
+            } catch (e) {
+              console.warn("onChunk failed:", e?.message);
+            }
+          }
         }
-      }
 
-      // (Optional) handle refusals as text too
-      if (evt.type === "response.refusal.delta") {
-        const delta = evt.delta || "";
-        if (delta) {
-          fullSummary += delta;
-          onChunk?.(delta);
+        if (evt.type === "response.refusal.delta") {
+          const delta = evt.delta || "";
+          if (delta) {
+            fullSummary += delta;
+            try {
+              onChunk?.(delta);
+            } catch (e) {
+              console.warn("onChunk failed:", e?.message);
+            }
+          }
         }
-      }
+
+        if (evt.type === "response.completed") {
+          resolve(evt.response); // ✅ this one has usage
+        }
+      });
     });
 
-    // When the model finishes (now you have usage)
-    stream.on("end", () => {
-      // no-op: stream.done() resolves below
-    });
+    await stream.done();
 
-    // Wait for completion & get the final response object
-    const finalResponse = await stream.finalResponse();
+    // Now wait for the model-completed response (no race)
+    let finalResponse = await completedResponseP;
 
-    console.log("Final response:", JSON.stringify(finalResponse, null, 2));
-
-    console.log("Summary: ", fullSummary);
-
-    const usage = finalResponse?.usage || {};
+    const usage = finalResponse?.usage || {
+      input_tokens: 0,
+      output_tokens: 0,
+      total_tokens: 0,
+    };
     const tokensUsed =
       usage.total_tokens ??
       (usage.input_tokens || 0) + (usage.output_tokens || 0);
@@ -241,7 +246,7 @@ export async function generateSummaryStream(
     const inputCost = inputTokens * (model_inputCost / 1_000_000);
     const outputCost = outputTokens * (model_outputCost / 1_000_000);
     const totalCost = inputCost + outputCost;
-
+    console.log(finalResponse);
     return {
       success: true,
       summary: fullSummary,

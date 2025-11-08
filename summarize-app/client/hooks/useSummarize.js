@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { summarizeText } from "../services/api";
+import { summarizeText, summarizeTextStream } from "../services/api";
 import { getOptions } from "../services/api";
 
 export const useSummarize = () => {
@@ -19,6 +19,9 @@ export const useSummarize = () => {
   // Metadata
   const [tokensUsed, setTokenUsed] = useState(0);
   const [cost, setCost] = useState(0);
+
+  // Streaming Mode
+  const [useStreaming, setUseStreaming] = useState(true);
 
   //Load available options
   useEffect(() => {
@@ -49,18 +52,40 @@ export const useSummarize = () => {
     setTokenUsed(0);
     setCost(0);
 
-    //Call API
-    const result = await summarizeText(text, mode, tone);
-
-    if (result.success) {
-      setSummary(result.data.summary);
-      setTokenUsed(result.data.tokensUsed);
-      setCost(result.data.cost);
+    if (useStreaming) {
+      //Use streaming API
+      console.log("Using streaming");
+      await summarizeTextStream(
+        text,
+        mode,
+        tone,
+        (chunk) => {
+          setSummary((prev) => prev + chunk);
+        },
+        (data) => {
+          setTokenUsed(data.tokensUsed);
+          setCost(data.cost);
+          setLoading(false);
+        },
+        (errorMsg) => {
+          setError(errorMsg);
+          setLoading(false);
+        }
+      );
     } else {
-      setError(result.error);
-    }
+      //Call API
+      const result = await summarizeText(text, mode, tone);
 
-    setLoading(false);
+      if (result.success) {
+        setSummary(result.data.summary);
+        setTokenUsed(result.data.tokensUsed);
+        setCost(result.data.cost);
+      } else {
+        setError(result.error);
+      }
+
+      setLoading(false);
+    }
   };
 
   const clearAll = () => {
@@ -93,5 +118,9 @@ export const useSummarize = () => {
     // Actions
     handleSummarize,
     clearAll,
+
+    //Streaming
+    useStreaming,
+    setUseStreaming,
   };
 };

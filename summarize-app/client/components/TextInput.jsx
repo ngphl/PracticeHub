@@ -12,7 +12,14 @@ export const TextInput = ({ value, onChange, disabled, placeholder }) => {
         placeholder={placeholder}
         disabled={disabled}
       ></textarea>
-      <div>Your text is {charCount} characters</div>
+      <div style={{
+        marginTop: "8px",
+        fontSize: "13px",
+        color: "#64748b",
+        textAlign: "right"
+      }}>
+        Your text is {charCount} characters
+      </div>
     </div>
   );
 };

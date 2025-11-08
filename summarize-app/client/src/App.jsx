@@ -25,13 +25,15 @@ function App() {
     error,
     tokensUsed,
     cost,
+    useStreaming,
+    setUseStreaming,
     handleSummarize,
     clearAll,
   } = useSummarize();
 
   return (
     <div className="App">
-      <h1>🤖 AI Text Summarizer</h1>
+      <h1>AI Text Summarizer</h1>
       <p style={{ color: "#666", fontSize: "14px" }}>
         Powered by OpenAI GPT-4o-mini
       </p>
@@ -67,11 +69,32 @@ function App() {
           options={availableOptions.tones}
           disabled={loading}
         />
+        {/* Streaming toggle
+        <div style={{ marginTop: "15px" }}>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={useStreaming}
+              onChange={(e) => setUseStreaming(e.target.checked)}
+              disabled={loading}
+            />
+            <span style={{ fontSize: "14px" }}>
+              ⚡ Real-time streaming (ChatGPT-like experience)
+            </span>
+          </label>
+        </div> */}
       </div>
 
       <div className="actions-section" style={{ display: "flex", gap: "10px" }}>
-        <Button onClick={handleSummarize} loading={loading} variant="primary">
-          Summarize
+        <Button onClick={handleSummarize} loading={loading}>
+          {useStreaming ? "⚡ Summarize (Stream)" : "Summarize"}
         </Button>
         <Button onClick={clearAll} loading={loading} variant="secondary">
           Clear

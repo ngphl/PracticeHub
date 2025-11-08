@@ -101,7 +101,6 @@ app.post("/api/summarize/stream", async (req, res) => {
     const result = await generateSummaryStream(text, mode, tone, (chunk) => {
       sseSend(res, { type: "chunk", content: chunk });
     });
-
     if (result.success) {
       sseSend(res, {
         type: "done",
