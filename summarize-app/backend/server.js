@@ -7,8 +7,8 @@ import cors from "cors";
 import "dotenv/config";
 import {
   generateSummary,
-  getAvailableOptions,
   generateSummaryStream,
+  getAvailableOptions,
 } from "./services/openai.js";
 
 // Create express server application
@@ -69,17 +69,12 @@ app.post("/summarize", async (req, res) => {
   }
 });
 
-// Helper function
-function sseSend(res, payload) {
-  res.write(`data: ${JSON.stringify(payload)}\n\n`);
-}
-
-//Stream
+// Streaming endpoint
 app.post("/api/summarize/stream", async (req, res) => {
   try {
     const { text, mode = "medium", tone = "professional" } = req.body;
 
-    //Validate
+    // Validate input
     if (!text || text.trim().length === 0) {
       return res.status(400).json({
         success: false,
@@ -94,29 +89,48 @@ app.post("/api/summarize/stream", async (req, res) => {
       });
     }
 
+    // Set up SSE headers
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering
 
+    // Helper to send SSE messages
+    const sendSSE = (data) => {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+      // Flush immediately to ensure chunks are sent right away
+      if (res.flush) res.flush();
+    };
+
+    // Generate summary with streaming
     const result = await generateSummaryStream(text, mode, tone, (chunk) => {
-      sseSend(res, { type: "chunk", content: chunk });
+      // Send each chunk as it arrives
+      console.log("Sending chunk:", chunk);
+      sendSSE({ type: "chunk", content: chunk });
     });
+
+    // Send final result or error
     if (result.success) {
-      sseSend(res, {
+      const doneData = {
         type: "done",
         summary: result.summary,
         tokensUsed: result.tokensUsed,
         cost: result.cost,
         mode: result.mode,
         tone: result.tone,
-      });
+      };
+      console.log("Sending done event:", doneData);
+      sendSSE(doneData);
     } else {
-      sseSend(res, { type: "error", error: result.error || "Stream Failed" });
+      sendSSE({ type: "error", error: result.error });
     }
+
     res.end();
-  } catch (err) {
-    console.error("SSE Stream Error: ", { err });
-    sseSend(res, { type: "error", error: result.error || "Stream Failed" });
+  } catch (error) {
+    console.error("Streaming endpoint error:", error);
+    res.write(
+      `data: ${JSON.stringify({ type: "error", error: "Internal server error" })}\n\n`
+    );
     res.end();
   }
 });

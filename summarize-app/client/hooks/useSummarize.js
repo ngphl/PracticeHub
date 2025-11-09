@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { summarizeText, summarizeTextStream } from "../services/api";
-import { getOptions } from "../services/api";
+import { flushSync } from "react-dom";
+import { summarizeText, summarizeTextStream, getOptions } from "../services/api";
 
 export const useSummarize = () => {
   const [text, setText] = useState("");
@@ -20,8 +20,9 @@ export const useSummarize = () => {
   const [tokensUsed, setTokenUsed] = useState(0);
   const [cost, setCost] = useState(0);
 
-  // Streaming Mode
-  const [useStreaming, setUseStreaming] = useState(true);
+  // Streaming mode
+  const [useStreaming, setUseStreaming] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   //Load available options
   useEffect(() => {
@@ -53,27 +54,41 @@ export const useSummarize = () => {
     setCost(0);
 
     if (useStreaming) {
-      //Use streaming API
-      console.log("Using streaming");
+      // Set streaming state and turn off loading
+      setIsStreaming(true);
+      setLoading(false);
+
+      // Use streaming API
       await summarizeTextStream(
         text,
         mode,
         tone,
+        // onChunk - append each chunk to summary
         (chunk) => {
-          setSummary((prev) => prev + chunk);
+          console.log("Received chunk:", chunk);
+          // Use flushSync to force immediate render for each chunk
+          flushSync(() => {
+            setSummary((prev) => prev + chunk);
+          });
         },
+        // onDone - update metadata
         (data) => {
-          setTokenUsed(data.tokensUsed);
-          setCost(data.cost);
-          setLoading(false);
+          console.log("Stream completed with data:", data);
+          flushSync(() => {
+            setTokenUsed(data.tokensUsed);
+            setCost(data.cost);
+            setIsStreaming(false);
+          });
         },
+        // onError - handle errors
         (errorMsg) => {
+          console.error("Stream error:", errorMsg);
           setError(errorMsg);
-          setLoading(false);
+          setIsStreaming(false);
         }
       );
     } else {
-      //Call API
+      // Use standard API
       const result = await summarizeText(text, mode, tone);
 
       if (result.success) {
@@ -119,8 +134,9 @@ export const useSummarize = () => {
     handleSummarize,
     clearAll,
 
-    //Streaming
+    // Streaming
     useStreaming,
     setUseStreaming,
+    isStreaming,
   };
 };

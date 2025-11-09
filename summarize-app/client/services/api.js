@@ -29,7 +29,7 @@ export const summarizeText = async (text, mode, tone) => {
   }
 };
 
-//API Functions (Stream)
+// API Function (Streaming with SSE)
 export const summarizeTextStream = async (
   text,
   mode,
@@ -48,35 +48,52 @@ export const summarizeTextStream = async (
     });
 
     if (!response.ok) {
-      throw new Error(`Stream request failed ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
+
       if (done) break;
 
-      //Decode chunk
-      const chunk = decoder.decode(value);
-      //Split by newlines
-      const lines = chunk.split("\n");
-      console.log(lines);
+      // Decode the chunk and add to buffer
+      buffer += decoder.decode(value, { stream: true });
+
+      // Split by newlines to get individual SSE messages
+      const lines = buffer.split("\n");
+
+      // Keep the last incomplete line in the buffer
+      buffer = lines.pop() || "";
+
       for (const line of lines) {
         if (line.startsWith("data: ")) {
-          const data = JSON.parse(line.slice(6));
-          if (data.type === "chunk") {
-            onChunk(data.content);
-          } else if (data.type === "done") {
-            onDone(data);
-          } else if (data.type === "error") {
-            onError(data.error);
+          try {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.type === "chunk") {
+              onChunk(data.content);
+            } else if (data.type === "done") {
+              console.log("Done event received:", data);
+              onDone({
+                tokensUsed: data.tokensUsed,
+                cost: data.cost,
+              });
+            } else if (data.type === "error") {
+              onError(data.error);
+              return;
+            }
+          } catch (parseError) {
+            console.warn("Failed to parse SSE data:", line, parseError);
           }
         }
       }
     }
   } catch (error) {
+    console.error("Streaming error:", error);
     onError(error.message || "Failed to stream summary");
   }
 };

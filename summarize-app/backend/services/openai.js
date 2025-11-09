@@ -144,8 +144,8 @@ export async function generateSummary(
  * @param {string} text - Text to summarize
  * @param {string} mode - Summarization mode
  * @param {string} tone - Tone
- * @param {Function} onChunk - Callback for each chunk
- * @returns {Promise<Object>}
+ * @param {Function} onChunk - Callback for each text chunk
+ * @returns {Promise<Object>} - Final result with usage stats
  */
 export async function generateSummaryStream(
   text,
@@ -154,6 +154,7 @@ export async function generateSummaryStream(
   onChunk
 ) {
   try {
+    // Validate inputs
     if (!text || text.trim().length === 0) {
       throw new Error("Text cannot be empty");
     }
@@ -163,7 +164,7 @@ export async function generateSummaryStream(
     }
 
     if (!TONES[tone]) {
-      throw new Error(`Invalid tone: ${mode}`);
+      throw new Error(`Invalid tone: ${tone}`);
     }
 
     const modeConfig = SUMMARIZATION_MODES[mode];
@@ -179,7 +180,8 @@ export async function generateSummaryStream(
         content: `${modeConfig.instruction}:\n\n${text}`,
       },
     ];
-    //Call OpenAI API
+
+    // Call OpenAI streaming API
     const stream = await openai.responses.stream({
       model: "gpt-4o-mini",
       input: input,
@@ -188,75 +190,93 @@ export async function generateSummaryStream(
     });
 
     let fullSummary = "";
-    // Promise resolves with the completed response
-    const completedResponseP = new Promise((resolve) => {
-      stream.on("event", (evt) => {
-        if (evt.type === "response.output_text.delta") {
-          const delta = evt.delta || "";
-          if (delta) {
-            fullSummary += delta;
-            // ⚠️ never let onChunk throw (SSE write can error if client disconnects)
+    let finalResponse = null;
+
+    // Listen to stream events
+    for await (const event of stream) {
+      // Log all event types for debugging
+      console.log("Stream event type:", event.type);
+
+      // Handle text delta events
+      if (event.type === "response.output_text.delta") {
+        const delta = event.delta || "";
+        if (delta) {
+          console.log("OpenAI delta received:", delta);
+          fullSummary += delta;
+          // Send chunk to callback (for SSE)
+          if (onChunk) {
             try {
-              onChunk?.(delta);
+              onChunk(delta);
             } catch (e) {
-              console.warn("onChunk failed:", e?.message);
+              console.warn("onChunk callback error:", e.message);
             }
           }
         }
+      }
 
-        if (evt.type === "response.refusal.delta") {
-          const delta = evt.delta || "";
-          if (delta) {
-            fullSummary += delta;
-            try {
-              onChunk?.(delta);
-            } catch (e) {
-              console.warn("onChunk failed:", e?.message);
-            }
-          }
-        }
+      // Capture the final response for usage stats
+      // Can be response.completed, response.done, or response.incomplete
+      if (
+        event.type === "response.completed" ||
+        event.type === "response.done" ||
+        event.type === "response.incomplete"
+      ) {
+        console.log("Final response event received:", event);
+        finalResponse = event.response;
+      }
+    }
 
-        if (evt.type === "response.completed") {
-          resolve(evt.response); // ✅ this one has usage
-        }
-      });
-    });
+    console.log("Stream ended. Final response:", finalResponse);
 
-    await stream.done();
-
-    // Now wait for the model-completed response (no race)
-    let finalResponse = await completedResponseP;
-
+    // Extract usage information
     const usage = finalResponse?.usage || {
       input_tokens: 0,
       output_tokens: 0,
       total_tokens: 0,
     };
-    const tokensUsed =
-      usage.total_tokens ??
-      (usage.input_tokens || 0) + (usage.output_tokens || 0);
 
-    //Calculate cost per 1M Tokens
+    const tokensUsed = usage.total_tokens;
+
+    // Calculate cost
     const model_inputCost = 0.4;
     const model_outputCost = 1.6;
-
-    const inputTokens = usage.input_tokens || 0;
-    const outputTokens = usage.output_tokens || 0;
-
-    const inputCost = inputTokens * (model_inputCost / 1_000_000);
-    const outputCost = outputTokens * (model_outputCost / 1_000_000);
+    const inputCost = usage.input_tokens * (model_inputCost / 1_000_000);
+    const outputCost = usage.output_tokens * (model_outputCost / 1_000_000);
     const totalCost = inputCost + outputCost;
-    console.log(finalResponse);
+
     return {
       success: true,
       summary: fullSummary,
-      tokensUsed: tokensUsed,
+      tokensUsed,
       cost: totalCost.toFixed(6),
       mode,
       tone,
     };
   } catch (error) {
     console.error("OpenAI Streaming Error:", error);
+
+    // Handle specific error codes
+    if (error.status === 401) {
+      return {
+        success: false,
+        error: "Invalid API key. Please check your OpenAI API key.",
+      };
+    }
+
+    if (error.status === 429) {
+      return {
+        success: false,
+        error: "Rate limit exceeded. Please try again in a moment.",
+      };
+    }
+
+    if (error.status === 500) {
+      return {
+        success: false,
+        error: "OpenAI service error. Please try again.",
+      };
+    }
+
     return {
       success: false,
       error: error.message || "Failed to generate summary",
