@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export const Select = ({ label, value, onChange, options, disabled }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +29,7 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
           display: "block",
           marginBottom: "8px",
           fontWeight: "600",
-          color: "#94a3b8",
+          color: "#736558",
           fontSize: "14px"
         }}
       >
@@ -39,30 +39,48 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
       {/* Custom Select Button */}
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={label}
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          } else if (e.key === 'Escape' && isOpen) {
+            e.preventDefault();
+            setIsOpen(false);
+          }
+        }}
         style={{
           width: "100%",
           padding: "12px 16px",
           fontSize: "15px",
           borderRadius: "12px",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          background: "rgba(26, 35, 71, 0.6)",
+          border: "1px solid rgba(115, 101, 88, 0.2)",
+          background: "rgba(242, 238, 235, 0.95)",
           backdropFilter: "blur(10px) saturate(180%)",
           WebkitBackdropFilter: "blur(10px) saturate(180%)",
-          color: "#e2e8f0",
+          color: selectedOption ? "#2C2C2C" : "#736558",
           cursor: disabled ? "not-allowed" : "pointer",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           opacity: disabled ? 0.5 : 1,
+          outline: "none",
           ...(isOpen && !disabled && {
-            borderColor: "rgba(59, 130, 246, 0.5)",
-            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+            borderColor: "rgba(166, 155, 141, 0.5)",
+            boxShadow: "0 0 0 3px rgba(166, 155, 141, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.7)",
           })
         }}
       >
-        <span>{selectedOption?.label}</span>
+        <span style={{ opacity: selectedOption ? 1 : 0.6 }}>
+          {selectedOption?.label || `Select ${label.toLowerCase()}...`}
+        </span>
         <svg
           width="12"
           height="12"
@@ -75,7 +93,7 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
         >
           <path
             d="M2 4L6 8L10 4"
-            stroke="#94a3b8"
+            stroke="#736558"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -86,18 +104,20 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
       {/* Dropdown Options */}
       {isOpen && (
         <div
+          role="listbox"
+          aria-label={`${label} options`}
           style={{
             position: "absolute",
             top: "100%",
             left: 0,
             right: 0,
             marginTop: "8px",
-            background: "rgba(20, 27, 58, 0.95)",
+            background: "rgba(242, 238, 235, 0.98)",
             backdropFilter: "blur(20px) saturate(180%)",
             WebkitBackdropFilter: "blur(20px) saturate(180%)",
             borderRadius: "12px",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(115, 101, 88, 0.2)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
             overflow: "hidden",
             zIndex: 1000,
             animation: "slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -107,26 +127,15 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
             <div
               key={option.value}
               onClick={() => handleSelect(option.value)}
+              className={`select-option ${value === option.value ? 'selected' : ''}`}
               style={{
                 padding: "12px 16px",
                 cursor: "pointer",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                background: value === option.value ? "rgba(59, 130, 246, 0.2)" : "transparent",
-                color: value === option.value ? "#60a5fa" : "#e2e8f0",
+                background: value === option.value ? "rgba(166, 155, 141, 0.3)" : "transparent",
+                color: value === option.value ? "#736558" : "#2C2C2C",
                 fontWeight: value === option.value ? "600" : "400",
-                borderBottom: index < options.length - 1 ? "1px solid rgba(255, 255, 255, 0.05)" : "none",
-              }}
-              onMouseEnter={(e) => {
-                if (value !== option.value) {
-                  e.target.style.background = "rgba(59, 130, 246, 0.1)";
-                  e.target.style.paddingLeft = "20px";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (value !== option.value) {
-                  e.target.style.background = "transparent";
-                  e.target.style.paddingLeft = "16px";
-                }
+                borderBottom: index < options.length - 1 ? "1px solid rgba(115, 101, 88, 0.1)" : "none",
               }}
             >
               {option.label}
@@ -145,6 +154,11 @@ export const Select = ({ label, value, onChange, options, disabled }) => {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+
+        .select-option:not(.selected):hover {
+          background: rgba(166, 155, 141, 0.2) !important;
+          transform: translateX(4px);
         }
       `}</style>
     </div>

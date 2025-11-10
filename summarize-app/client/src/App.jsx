@@ -31,7 +31,7 @@ function App() {
   return (
     <div className="App">
       <h1>AI Text Summarizer</h1>
-      <p style={{ color: "#666", fontSize: "14px" }}>
+      <p style={{ color: "#A69B8D", fontSize: "14px", opacity: 0.85 }}>
         Powered by OpenAI GPT-4o-mini
       </p>
       <div className="input-section">
@@ -69,7 +69,16 @@ function App() {
       </div>
 
       <div style={{ marginTop: "15px", marginBottom: "10px" }}>
-        <div
+        <button
+          role="switch"
+          aria-checked={useStreaming}
+          aria-label="Toggle streaming mode for real-time summarization"
+          disabled={loading || isStreaming}
+          onClick={() => {
+            if (!loading && !isStreaming) {
+              setUseStreaming(!useStreaming);
+            }
+          }}
           style={{
             position: "relative",
             display: "inline-flex",
@@ -79,25 +88,21 @@ function App() {
             paddingRight: "44px",
             height: "36px",
             backgroundColor: useStreaming
-              ? "rgba(59, 130, 246, 0.25)"
-              : "rgba(71, 85, 105, 0.2)",
+              ? "rgba(166, 155, 141, 0.3)"
+              : "rgba(115, 101, 88, 0.15)",
             borderRadius: "18px",
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             border: useStreaming
-              ? "1px solid rgba(59, 130, 246, 0.4)"
-              : "1px solid rgba(148, 163, 184, 0.25)",
+              ? "1px solid rgba(166, 155, 141, 0.5)"
+              : "1px solid rgba(115, 101, 88, 0.2)",
             boxShadow: useStreaming
-              ? "0 0 20px rgba(59, 130, 246, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1)"
+              ? "0 0 20px rgba(166, 155, 141, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.3)"
               : "inset 0 1px 2px rgba(0, 0, 0, 0.15)",
             backdropFilter: "blur(10px)",
             cursor: isStreaming ? "not-allowed" : "pointer",
             opacity: isStreaming ? 0.5 : 1,
             userSelect: "none",
-          }}
-          onClick={() => {
-            if (!loading && !isStreaming) {
-              setUseStreaming(!useStreaming);
-            }
+            outline: "none",
           }}
         >
           {/* Sliding toggle ball */}
@@ -111,19 +116,19 @@ function App() {
               justifyContent: "center",
               width: "28px",
               height: "28px",
-              backgroundColor: useStreaming ? "#3b82f6" : "#64748b",
+              backgroundColor: useStreaming ? "#A69B8D" : "#736558",
               borderRadius: "50%",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               boxShadow: useStreaming
-                ? "0 2px 8px rgba(59, 130, 246, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3)"
-                : "0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)",
+                ? "0 2px 8px rgba(166, 155, 141, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4)"
+                : "0 2px 4px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2)",
               background: useStreaming
-                ? "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)"
-                : "linear-gradient(135deg, #94a3b8 0%, #64748b 100%)",
+                ? "linear-gradient(135deg, #D9D2CC 0%, #A69B8D 100%)"
+                : "linear-gradient(135deg, #8C7F70 0%, #736558 100%)",
               pointerEvents: "none",
             }}
           >
-            <span style={{ fontSize: "16px", lineHeight: 1, color: "white" }}>
+            <span style={{ fontSize: "16px", lineHeight: 1, color: "#2C2C2C" }}>
               {useStreaming ? "✓" : ""}
             </span>
           </div>
@@ -132,18 +137,18 @@ function App() {
           <span
             style={{
               fontSize: "14px",
-              fontWeight: "500",
-              color: useStreaming ? "#e0f2fe" : "#64748b",
+              fontWeight: "600",
+              color: useStreaming ? "#F2EEEB" : "#8C7F70",
               textShadow: useStreaming
-                ? "0 0 10px rgba(224, 242, 254, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3)"
-                : "none",
+                ? "0 0 12px rgba(242, 238, 235, 0.6), 0 2px 4px rgba(0, 0, 0, 0.3)"
+                : "0 1px 2px rgba(0, 0, 0, 0.3)",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               pointerEvents: "none",
             }}
           >
             Streaming
           </span>
-        </div>
+        </button>
       </div>
 
       <div className="actions-section" style={{ display: "flex", gap: "10px" }}>

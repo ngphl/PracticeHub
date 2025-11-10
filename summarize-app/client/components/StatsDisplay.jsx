@@ -1,5 +1,3 @@
-import React from "react";
-
 export const StatsDisplay = ({ tokensUsed, cost }) => {
   if (!tokensUsed) return null;
 
@@ -8,24 +6,24 @@ export const StatsDisplay = ({ tokensUsed, cost }) => {
       style={{
         marginTop: "16px",
         padding: "16px 20px",
-        background: "rgba(20, 27, 58, 0.4)",
+        background: "rgba(43, 18, 76, 0.3)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
         borderRadius: "12px",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
         fontSize: "13px",
-        color: "#94a3b8",
+        color: "#DFB6B2",
         display: "flex",
         gap: "24px",
         justifyContent: "center",
-        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
       }}
     >
       <div>
-        <strong style={{ color: "#60a5fa" }}>Tokens:</strong> {tokensUsed}
+        <strong style={{ color: "#DFB6B2" }}>Tokens:</strong> {tokensUsed}
       </div>
       <div>
-        <strong style={{ color: "#60a5fa" }}>Cost:</strong> ${cost}
+        <strong style={{ color: "#DFB6B2" }}>Cost:</strong> ${cost}
       </div>
     </div>
   );

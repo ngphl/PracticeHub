@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { flushSync } from "react-dom";
+import { useState, useEffect, useCallback } from "react";
 import { summarizeText, summarizeTextStream, getOptions } from "../services/api";
 
 export const useSummarize = () => {
@@ -35,7 +34,7 @@ export const useSummarize = () => {
     loadOptions();
   }, []);
 
-  const handleSummarize = async () => {
+  const handleSummarize = useCallback(async () => {
     //Check
     if (!text.trim()) {
       setError("Please enter some text to summarize");
@@ -66,19 +65,14 @@ export const useSummarize = () => {
         // onChunk - append each chunk to summary
         (chunk) => {
           console.log("Received chunk:", chunk);
-          // Use flushSync to force immediate render for each chunk
-          flushSync(() => {
-            setSummary((prev) => prev + chunk);
-          });
+          setSummary((prev) => prev + chunk);
         },
         // onDone - update metadata
         (data) => {
           console.log("Stream completed with data:", data);
-          flushSync(() => {
-            setTokenUsed(data.tokensUsed);
-            setCost(data.cost);
-            setIsStreaming(false);
-          });
+          setTokenUsed(data.tokensUsed);
+          setCost(data.cost);
+          setIsStreaming(false);
         },
         // onError - handle errors
         (errorMsg) => {
@@ -101,15 +95,15 @@ export const useSummarize = () => {
 
       setLoading(false);
     }
-  };
+  }, [text, mode, tone, useStreaming]);
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setText("");
     setSummary("");
     setError("");
     setTokenUsed(0);
     setCost(0);
-  };
+  }, []);
 
   return {
     // Text state

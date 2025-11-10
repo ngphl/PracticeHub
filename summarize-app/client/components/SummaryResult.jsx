@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -16,12 +16,12 @@ export const SummaryResult = ({ summary, loading, isStreaming }) => {
   };
 
   if (loading) {
-    return <p className="loading">⏳ Processing your text...</p>;
+    return <p className="loading" role="status" aria-live="polite">⏳ Processing your text...</p>;
   }
 
   if (!summary) return null;
   return (
-    <div className="result-box">
+    <div className="result-box" role="region" aria-label="Summary result">
       <div
         style={{
           display: "flex",
@@ -33,34 +33,37 @@ export const SummaryResult = ({ summary, loading, isStreaming }) => {
         <h3 style={{ margin: 0 }}>
           Summary:{" "}
           {isStreaming && (
-            <span style={{ fontSize: "12px", color: "#a0aec0" }}>
+            <span style={{ fontSize: "12px", color: "#736558" }}>
               (streaming...)
             </span>
           )}
         </h3>
         <button
           onClick={handleCopy}
+          className={`copy-button ${copied ? 'copied' : ''}`}
+          aria-label={copied ? "Summary copied to clipboard" : "Copy summary to clipboard"}
           style={{
-            padding: "6px 12px",
+            padding: "8px 16px",
             fontSize: "12px",
-            backgroundColor: copied ? "#4CAF50" : "#4a5568",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
+            backgroundColor: copied ? "#A69B8D" : "rgba(166, 155, 141, 0.5)",
+            color: copied ? "#2C2C2C" : "#40572F",
+            border: "1px solid rgba(115, 101, 88, 0.3)",
+            borderRadius: "8px",
             cursor: "pointer",
             transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            if (!copied) e.target.style.backgroundColor = "#2d3748";
-          }}
-          onMouseLeave={(e) => {
-            if (!copied) e.target.style.backgroundColor = "#4a5568";
+            fontWeight: "500",
           }}
         >
           {copied ? "✓ Copied!" : "Copy"}
         </button>
       </div>
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
+      <style>{`
+        .copy-button:not(.copied):hover {
+          background-color: rgba(166, 155, 141, 0.7) !important;
+          transform: translateY(-1px);
+        }
+      `}</style>
     </div>
   );
 };

@@ -11,6 +11,7 @@ This is a full-stack AI text summarization application using OpenAI's Responses 
 ## Development Commands
 
 ### Backend (Express server)
+
 ```bash
 cd backend
 npm install
@@ -21,6 +22,7 @@ npm start       # Production
 Backend runs on port 3000 (configurable via `PORT` env var).
 
 ### Client (React + Vite)
+
 ```bash
 cd client
 npm install
@@ -33,9 +35,11 @@ npm run preview # Preview production build
 ## Environment Setup
 
 **Backend** (`backend/.env`):
+
 - `OPENAI_API_KEY` - Required for OpenAI API access
 
 **Client** (`client/.env.local`):
+
 - `VITE_API_URL` - Backend URL (defaults to `http://localhost:3000`)
 
 ## Architecture
@@ -45,12 +49,14 @@ npm run preview # Preview production build
 **Entry**: `server.js` - Express server with CORS and JSON middleware
 
 **Key Endpoints**:
+
 - `GET /` - Health check
 - `GET /api/options` - Returns available summarization modes/tones
 - `POST /summarize` - Standard summarization (waits for full response)
 - `POST /api/summarize/stream` - Server-Sent Events (SSE) streaming
 
 **Core Logic**: `services/openai.js`
+
 - `generateSummary()` - Uses OpenAI Responses API for standard requests
 - `generateSummaryStream()` - Streams responses in real-time via SSE
 - Handles token counting and cost calculation (input: $0.4/1M tokens, output: $1.6/1M)
@@ -63,11 +69,13 @@ npm run preview # Preview production build
 **State Management**: Custom hook `hooks/useSummarize.js` centralizes all state and API logic
 
 **API Layer**: `services/api.js`
+
 - `summarizeText()` - Axios POST for standard requests
 - `summarizeTextStream()` - Fetch API with ReadableStream for SSE
 - `getOptions()` - Fetches available modes/tones
 
 **Components** (in `components/`):
+
 - `TextInput` - Textarea for input text
 - `Select` - Dropdown for mode/tone selection
 - `Button` - Action buttons
@@ -87,4 +95,6 @@ npm run preview # Preview production build
 ## Testing
 
 API tests are located in `backend/API_TEST/` (Bruno format).
-- When add new text into the website always keep the style, font, color, size consistent with the rest of the website
+
+- When add new text/component into the website always keep the style, font, color, size consistent with the rest of the website
+- Use Context7 to check up-to-date docs when needed for implementing new libraries, framework, features, or debugging, updating, or refractoring any codes that use them.

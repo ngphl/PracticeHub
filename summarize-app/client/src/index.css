@@ -1,23 +1,24 @@
-/* Dark Theme - Glassmorphism Apple-Style Design */
+/* Sepia Theme - Dark Background with Bright Components */
 :root {
-  --bg-primary: #0a0e27;
-  --bg-secondary: rgba(20, 27, 58, 0.6);
-  --bg-tertiary: rgba(26, 35, 71, 0.6);
-  --accent-blue: #3b82f6;
-  --accent-blue-hover: #2563eb;
-  --accent-blue-light: rgba(59, 130, 246, 0.15);
-  --accent-blue-border: rgba(59, 130, 246, 0.3);
-  --glass-bg: rgba(20, 27, 58, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --bg-primary: #4A4238;
+  --bg-secondary: rgba(115, 101, 88, 0.6);
+  --bg-tertiary: rgba(115, 101, 88, 0.5);
+  --accent-primary: #A69B8D;
+  --accent-primary-hover: #D9D2CC;
+  --accent-light: rgba(166, 155, 141, 0.25);
+  --accent-border: rgba(166, 155, 141, 0.5);
+  --glass-bg: rgba(242, 238, 235, 0.95);
+  --glass-border: rgba(115, 101, 88, 0.2);
+  --text-primary: #2C2C2C;
+  --text-secondary: #736558;
+  --text-muted: #736558;
+  --text-on-dark: #F2EEEB;
   --error-bg: rgba(239, 68, 68, 0.1);
   --error-border: #ef4444;
   --error-text: #fca5a5;
-  --success-bg: rgba(34, 197, 94, 0.1);
-  --success-border: #22c55e;
-  --success-text: #86efac;
+  --success-bg: rgba(166, 155, 141, 0.2);
+  --success-border: #A69B8D;
+  --success-text: #736558;
 }
 
 * {
@@ -25,7 +26,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 25%, #141b3a 50%, #0f1629 75%, #1a2347 100%);
+  background: linear-gradient(135deg, #4A4238 0%, #5A4D42 25%, #3E3530 50%, #564A3F 75%, #4A4238 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   min-height: 100vh;
@@ -42,9 +43,9 @@ body::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(96, 165, 250, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 50%, rgba(115, 101, 88, 0.12) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(166, 155, 141, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 20% 80%, rgba(115, 101, 88, 0.15) 0%, transparent 50%);
   animation: float 20s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
@@ -84,18 +85,18 @@ body::before {
 .App h1 {
   text-align: center;
   margin-bottom: 8px;
-  color: var(--text-primary);
+  color: var(--text-on-dark);
   font-size: 3rem;
   font-weight: 800;
   letter-spacing: -1.5px;
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+  background: linear-gradient(135deg, #F2EEEB 0%, #D9D2CC 50%, #E5DDD5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
   display: inline-block;
   width: 100%;
-  text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+  text-shadow: 0 0 40px rgba(242, 238, 235, 0.3);
 }
 
 .App h1::before {
@@ -105,19 +106,20 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+  background: linear-gradient(135deg, #F2EEEB 0%, #D9D2CC 50%, #E5DDD5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   filter: blur(20px);
-  opacity: 0.5;
+  opacity: 0.4;
   z-index: -1;
 }
 
 .App > p {
   text-align: center;
   margin-bottom: 40px;
-  color: var(--text-secondary);
+  color: var(--text-on-dark);
+  opacity: 0.85;
 }
 
 header {
@@ -171,44 +173,45 @@ header h1 {
   line-height: 1.7;
   letter-spacing: 0.2px;
   font-weight: 400;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .text-input::placeholder {
   color: var(--text-muted);
+  opacity: 0.6;
 }
 
 .text-input:focus {
   outline: none;
-  border-color: var(--accent-blue);
-  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  box-shadow: 0 0 0 3px var(--accent-blue-light),
-              0 8px 32px rgba(59, 130, 246, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-light),
+              0 8px 32px rgba(115, 101, 88, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .text-input:disabled {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 .summarize-btn {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-  color: white;
-  padding: 14px 36px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+  color: var(--text-primary);
+  padding: 16px 42px;
+  border: 1px solid rgba(115, 101, 88, 0.3);
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4),
+  box-shadow: 0 4px 16px rgba(115, 101, 88, 0.3),
               0 2px 8px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
   position: relative;
   overflow: hidden;
 }
@@ -229,56 +232,57 @@ header h1 {
 }
 
 .summarize-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #B5A99C 0%, #E3DDD6 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5),
+  box-shadow: 0 6px 24px rgba(166, 155, 141, 0.5),
               0 4px 12px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .summarize-btn:active:not(:disabled) {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .summarize-btn:disabled {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   cursor: not-allowed;
   box-shadow: none;
   opacity: 0.5;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(115, 101, 88, 0.2);
 }
 
 .secondary-btn {
-  background: var(--glass-bg);
+  background: rgba(242, 238, 235, 0.6);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   color: var(--text-primary);
-  padding: 14px 36px;
-  border: 1px solid var(--glass-border);
+  padding: 14px 32px;
+  border: 1px solid var(--accent-border);
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .secondary-btn:hover:not(:disabled) {
-  background: var(--bg-tertiary);
+  background: rgba(217, 210, 204, 1);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border-color: rgba(59, 130, 246, 0.5);
+  border-color: var(--accent-primary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 20px rgba(115, 101, 88, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .secondary-btn:active:not(:disabled) {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .secondary-btn:disabled {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -291,17 +295,17 @@ header h1 {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 16px;
   border: 1px solid var(--glass-border);
-  border-left: 4px solid var(--accent-blue);
+  border-left: 4px solid var(--accent-primary);
   animation: slideIn 0.4s ease-out;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-              0 0 60px rgba(59, 130, 246, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+              0 0 60px rgba(166, 155, 141, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .result-box h3 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #60a5fa;
+  color: var(--text-secondary);
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.3px;
@@ -332,22 +336,22 @@ header h1 {
 }
 
 .result-box strong {
-  color: #93c5fd;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .result-box em {
-  color: #bfdbfe;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .result-box code {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(166, 155, 141, 0.2);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   font-size: 14px;
-  color: #93c5fd;
+  color: var(--text-secondary);
 }
 
 .error-box {
@@ -398,5 +402,51 @@ header h1 {
   }
   60%, 100% {
     content: '...';
+  }
+}
+
+/* Custom Focus Styles */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid #F2EEEB;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #736558,
+              0 0 0 5px rgba(242, 238, 235, 0.3);
+}
+
+button:focus-visible,
+[role="switch"]:focus-visible,
+[role="combobox"]:focus-visible {
+  outline: 3px solid #F2EEEB;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px #736558,
+              0 0 0 5px rgba(242, 238, 235, 0.3),
+              0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.text-input:focus-visible {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-light),
+              0 8px 32px rgba(115, 101, 88, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  body, body::before {
+    animation: none !important;
+  }
+
+  .result-box,
+  .error-box {
+    animation: none !important;
+  }
+
+  * {
+    transition: none !important;
   }
 }
